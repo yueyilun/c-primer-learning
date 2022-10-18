@@ -79,6 +79,136 @@ pi = &ival; // value in pi is changed; pi now points to ival
 void*是一种特殊的指针类型，可用于存放任意对象的地址。对该地址中到底是个什么类型的对象并不了解  
 不能直接操作void*指针所指的对象。以void*的视角来看内存空间也就仅仅是内存空间，没办法访问空间中所存的对象
 
+#### 2.3.3 理解复合类型的声明
+1.在定义语句中，类型修饰符(*或&)并非作用于本次定义的全部变量，而是紧接着的哪个变量  
+```
+//合法但容易产生误导，p1是指向int的指针而p2是int
+int* p1, p2  
+```  
+**2.指向指针的指针**  
+图片：指向指针的指针  
+**3.指向指针的引用**  
+1.引用本身不是一个对象，因此不能定义指向引用的指针。但指针是对象，所以存在对指针的引用  
+```
+int i = 42;
+int *p; // p is a pointer to int
+int *&r = p; // r is a reference to the pointer p
+r = &i; // r refers to a pointer; assigning &i to makes p point to i
+*r = 0; // dereferencing r yields i, the object to which p points; changes i to 0
+```
+图片：指向指针的引用
+
+### 2.4 const限定符
+1.const对象必须初始化，且其值不能被改变  
+2.默认状态下，const对象仅在文件内有效  
+3.若想被其他文件使用，则在声明和定义时都添加extern  
+#### 2.4.1 const的引用（p55）
+术语：通常把“对const的引用”简称为“常量引用”
+```
+int i = 42;
+const int &r2 = i //合法，但不允许通过r2修改i的值
+```
+但是i的值允许通过其他途径修改，比如直接给i赋值  
+#### 2.4.2 指针与const  
+1.允许一个指向常量的指针指向一个非常量对象
+```
+const double pi = 3.14; // pi is const; its value may not be changed double *ptr = &pi; // error: ptr is a plain pointer const double *cptr = &pi; // ok: cptr may point to a double that is const
+*cptr = 42; // error: cannot assign to *cptr 
+
+double dval = 3.14; // dval is a double; its value can be changed
+cptr = &dval; // ok: but can't change dval through cptr
+```  
+2.所谓指向常量的指针仅仅要求不能通过该指针改变对象的值，而没有规定那个对象的值不能通过其他途径改变。  
+
+**2.const指针**  
+*const说明该指针是一个常量，即不变的是指针本身的值而非指向的那个值：  
+```
+int errNumb = 0;
+int *const curErr = &errNumb; // curErr will always point to errNumb
+const double pi = 3.14159;
+const double *const pip = &pi; // pip is a const pointer to a const（指向常量对象的常量指针）(从右向左阅读)
+```
+**3.指向常量的指针vs常量指针**  
+- 指向常量的指针：关键在于**指向的目标是一个常量**，可以改变指向，不能通过解引用修改数据
+- 常量指针：不可以改变指向，但可以通过解引用修改数据  
+#### 2.4.3 顶层const 
+**用顶层const表示指针本身是个常量，用底层const表示指针所指的对象是一个常量；一般的，顶层const可以表示任意的对象是常量**  
+顶层const需要初始化，底层const不必（练习2.28）
+```
+int i = 0;
+int *const p1 = &i; // we can't change the value of p1; const is top-level
+const int ci = 42; // we cannot change ci; const is top-level
+const int *p2 = &ci; // we can change p2; const is low-level
+const int *const p3 = p2; // right-most const is top-level, left-most is not
+const int &r = ci; // const in reference types is always low-level
+```  
+#### 2.4.4 constexpr(c++11)和常量表达式  
+Under the new standard, we can ask the compiler to verify that a variable is a constant expression by declaring the variable in a constexpr declaration. Variables declared as constexpr are implicitly const and must be initialized by constant expressions:  
+```
+constexpr int mf = 20; // 20 is a constant expression
+constexpr int limit = mf + 1; // mf + 1 is a constant expression
+constexpr int sz = size(); // ok only if size is a constexpr function
+```  
+
+### 2.5 处理类型  
+#### 2.5.1 类型别名  
+两种方法：  
+1.传统方法：typedef double wages; //wages是double的别名  
+2.**(c++11)别名声明：using SI = Sales_item //SI是Sales_item的同义词** 
+#### 2.5.2 auto类型说明符(c++11)
+auto:能使编译器替我们去分析表达式所属的类型，其定义的变量必须有初始值  
+1.当引用成为auto初始值时，真正参与初始化的其实是引用对象的值，auto类型为引用对象的类型  
+2.auto一般会忽略顶层const，保留底层  
+#### 2.5.3 decltype类型指示符(c++11)
+选择并返回操作数的数据类型  
+### 2.6 自定义数据结构
+#### 2.6.3 编写自己的头文件
+头文件保护符  
+#define #ifdef #ifndef
+```
+#ifndef  SALES_DATA_H
+#define SALES_DATA_H
+#include <string>
+struct Sales_data { 
+  std::string bookNo;   
+  unsigned units_sold = 0; 
+  double revenue = 0.0;
+};
+#endif
+```  
+
+## chapter3 Strings Vectors Arrays  
+#### 3.2.2 string对象上的操作  
+string的操作                                                                                                   
+os<<s          ------  将s写到输出流os当中，返回os                
+is>>s          ------  从is中读取字符串赋给s, 字符串以空白分割  
+                       返回is                                    
+getline(is, s) ------  从is中读取一行赋给s，返回is               
+s.empyt()      ------  s为空返回true，否则为false                
+s.size()       ------  返回s中字符的个数;**注意：该函数返回的事string::size_type类型，是一个无符号整型数，不要和有符号数混用**                         
+s[n]           ------  返回s中第n个字符的引用                    
+s1 + s2        ------  返回s1和s2连接后的结果                     
+s1 = s2        ------  用s2的副本代替s1中原来的字符               
+s1 == s2       ------  如果s1和s2中所含的字符完全一样，则相等；  
+s1 != s2       ------                                          
+<, <=, >, >=   ------  利用字符在字典中的顺序进行比较，对大小写敏感  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
