@@ -1,3 +1,4 @@
+[toc]
 ## 关键概念
 1.**静态类型：**c++是一种静态类型语言，在编译阶段检查类型。其中，检查类型的过程称为类型检查。
 ## chapter1
@@ -29,6 +30,7 @@ extern double pi = 3.1416; // definition
 5.变量命名规范：用户自定义的类名一般以大写字母开头，如Sales_item  
 ### 2.3 复合类型
 #### 2.3.1 引用
+- **引用不是对象！！！**
 - Technically speaking, when we use the term reference, we mean “lvalue reference.”（左值引用） 
 ```
 int ival = 1024;
@@ -192,6 +194,85 @@ s1 = s2        ------  用s2的副本代替s1中原来的字符
 s1 == s2       ------  如果s1和s2中所含的字符完全一样，则相等；  
 s1 != s2       ------                                          
 <, <=, >, >=   ------  利用字符在字典中的顺序进行比较，对大小写敏感  
+#### 3.2.3 处理string对象中的字符  
+(c++11)范围for语句  
+eg:  
+```
+string str("some string");
+// print the characters in str one character to a line
+for (auto c : str) // for every char in str
+  cout << c << endl; // print the current character followed by a newline
+```
+若想改变string对象中字符的值，必须把循环变量定义成引用类型
+### 3.3 标准库类型vector  
+初始化vector对象的方法                                        
+vector<T> v1                 ------  v1是一个空vector，潜在的元素是T类型，执行默认初始化  
+vector<T> v2(v1)             ------  v2中包含有v1所有元素的副本                           
+vector<T> v2 = v1            ------  等价于v2(v1)                                         
+vector<T> v3(n, val)         ------  v3包含了n个重复的元素，每个元素的值都为val           
+vector<T> v4(n)              ------  v4包含了n个重复地执行了值初始化的对象                
+vector<T> v5{a, b, c...}     ------  v5包含了初始值个数的元素，每个元素被赋予相应的初值   
+vector<T> v5 = {a, b, c...}  ------  等价于 v5{a, b, c...}  
+#### 3.3.1 定义和初始化vector对象
+(c++11):新的vector初始化方法，列表初始化  
+vector<string> articles = {"a", "an", "the"};        
+### 3.4 迭代器介绍  
+1.为什么实例的for循环中多用"!="判断，而非"<"：  
+简而言之："!="的适用范围更广  
+Programmers coming to C++ from C or Java might be surprised that we used != rather than  < in our for loops such as the one above and in the one on page  94. C++ programmers use  != as a matter of habit. They do so for the same reason that they use iterators rather than subscripts: This coding style applies equally well to various kinds of containers provided by the library. As we’ve seen, only a few library types,  vector and string being among them, have the subscript operator. Similarly, all of the library containers have iterators that define the == and != operators. Most of those iterators do not have the < operator. By routinely using iterators and !=, we don’t have to worry about the precise type of container we’re processing.   
+2.(c++11)新函数cbegin、cend：
+```
+auto it3 = v.cbegin();
+```
+使用这两个函数时，不管vector对象本身是否是常量，返回值都是const_iterator  
+3.结合解引用和成员访问操作：箭头运算符把解引用和成员访问两个操作结合在一起，也就是说，it->mem和(*it).men表达的意思相同。  
+**4.但凡使用了迭代器的循环体，都不要向迭代器所属的容器添加元素！！（什么意思，不太明白，以及删除元素可以吗）**  
+### 3.5 数组
+**数组的定义要从内而外阅读更容易理解**
+### 3.6 多维数组
+**1.严格来说，c++语言中没有多维数组，通常所说的多维数组其实是数组的数组**  
+```
+int ia[3][4]; // array of size 3; each element is an array of ints of size 4
+// array of size 10; each element is a 20-element array whose elements are arrays of 30 ints
+int arr[10][20][30] = {0}; // initialize all elements to 0
+```  
+2.要使用范围for语句(for(a:b))处理多维数组，处理最内层循环外，其他所有循环的控制变量都应该是引用类型  
+## chapter4 表达式  
+### 4.4 赋值运算符
+- 注意初始化和赋值是有区别的  
+- 赋值运算满足右结合律  
+```
+int ival, jval;
+ival = jval = 0; // ok: each assigned 0
+```  
+- 注意：赋值运算符优先级较低，低于关系运算符  
+### 4.5 递增和递减运算符(++ --)
+1.前置版本返回对象为左值，后置版本返回对象为右值  
+2.除非必须，否则不使用后置版本  
+### 4.8 位运算符
+强烈建议仅将位运算符用于处理无符号类型  
+### 4.11 类型转换
+这一节没认真看
+#### 4.11.3 显示转换 
+static_cast dynamic_cast const_cast reinterpret_cast
+尽量避免强制类型转换  
+### 4.12 运算符优先级表  
+
+## chapter5 语句  
+#### 5.4.3 范围for语句(c++11)
+```
+for (declaration : expression)
+  statement  
+```
+expression表示的必须是一个序列  
+```
+vector<int> v = {0,1,2,3,4,5,6,7,8,9};
+// range variable must be a reference so we can write to the elements
+for (auto &r : v) // for each element in v
+  r *= 2; // double the value of each element in v
+```  
+### 5.6 try语句块和异常处理  
+**具体的例子应该怎么写呢**
 
 
 
